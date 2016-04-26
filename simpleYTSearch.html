@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="css/jquery.fancybox.css">
+</head>
+<body>
+	<form>
+		<h1>Let's search le Youtube!</h1>
+		<input id="query" type="text" placeholder="Search meh">
+		<br>
+		<button id="submit">Enter</button>
+
+	</form>
+	<div id="results">
+		<ul>
+			
+		</ul>
+	</div>
+	<script src="https://code.jquery.com/jquery-1.12.3.min.js" integrity="sha256-aaODHAgvwQW1bFOGXMeX+pC4PZIPsvn2h1sArYOhgXQ=" crossorigin="anonymous"></script>
+	<!-- FANCYBOX PLUGIN -->
+	<script type="text/javascript" src="js/jquery.fancybox.pack.js"></script>
+	<script type="text/javascript">
+
+	//	Simple YT Search List (Use YT Data API plus get API key, no OAuth2 required )
+	//	https://developers.google.com/youtube/v3/docs/search/list#try-it
+	//	Has pagination
+		$(document).ready(function(){
+			$(".fancybox").fancybox();
+
+			$("#submit").click(function(e){
+				e.preventDefault();
+				var ytUrl = 'https://www.youtube.com/watch?v='
+				q = $("#query").val();
+				$("#results ul").html('');
+				$.get('https://www.googleapis.com/youtube/v3/search', {
+					key:'<your key here>',
+					part:'snippet, id',
+					q:q,
+					type:'video'
+				}).done(function(data){
+					//console.log(data)
+
+					console.log(data);
+					var videos = data.items;
+					var next = data.nextPageToken;
+					var prev = data.prevPageToken;
+					var btns = createButtons(prev, next);
+					$("#results").append("<div id='button-output'>"+btns+"</div>");
+
+					videos.forEach(function(vid){
+						var snippet = vid.snippet;
+						var id = vid.id.videoId;
+						var title = snippet.title;
+						var thumb = snippet.thumbnails.high.url;
+						var h = snippet.thumbnails.high.height;
+						var w = snippet.thumbnails.high.width;
+
+						
+
+					 	$("#results ul").append('<li><div><h3>'+title+'</h3><p><a class="fancybox fancybox.iframe" target="_blank" href="http://www.youtube.com/embed/'+id+'"><img src="'+thumb+'" width="'+w+'"" height="'+h+'"></a></p><p><a class="fancybox fancybox.iframe" target="_blank" href="http://www.youtube.com/embed/'+id+'">'+ytUrl+id+'</a></p></div></li>');
+					 });
+				});
+			})
+		});
+
+		function createButtons(prevPageToken, nextPageToken){
+			var btnOutput;
+			if(!prevPageToken){
+				btnOutput = '<div id="buttons"><button id="next-button" data-token="'+nextPageToken+'" data-query="'+q+'" onclick="nextPage();">Next Page</button></div>';
+			}else {
+				btnOutput = '<div id="buttons"><button id="prev-button" data-token="'+prevPageToken+'" data-query="'+q+'" onclick="prevPage();">Prev Page</button><button id="next-button" data-token="'+nextPageToken+'" data-query="'+q+'" onclick="nextPage();">Next Page</button></div>';			
+			}
+			return btnOutput;
+		}
+
+		function nextPage(){
+					var ytUrl = 'https://www.youtube.com/watch?v=',
+					q = $("#next-button").attr('data-query'),
+					dataToken = $("#next-button").data('token');
+
+				$("#results").html('');
+				var ul = $("<ul/>", {
+					id:'test'
+				});
+				$("#results").append(ul);
+
+				$.get('https://www.googleapis.com/youtube/v3/search', {
+					key:'<your API Key here>',
+					part:'snippet, id',
+					q:q,
+					pageToken:dataToken,
+					type:'video'
+				}).done(function(data){
+					console.log(data);
+					var videos = data.items;
+					var next = data.nextPageToken;
+					var prev = data.prevPageToken;
+					var btns = createButtons(prev, next);
+					$("#results").append("<div id='button-output'>"+btns+"</div>");
+
+					videos.forEach(function(vid){
+						var snippet = vid.snippet;
+						var id = vid.id.videoId;
+						var title = snippet.title;
+						var thumb = snippet.thumbnails.high.url;
+						var h = snippet.thumbnails.high.height;
+						var w = snippet.thumbnails.high.width;
+
+						$("#results ul").append('<li><div><h3>'+title+'</h3><p><a class="fancybox fancybox.iframe" target="_blank" href="http://www.youtube.com/embed/'+id+'"><img src="'+thumb+'" width="'+w+'"" height="'+h+'"></a></p><p><a class="fancybox fancybox.iframe" target="_blank" href="http://www.youtube.com/embed/'+id+'">'+ytUrl+id+'</a></p></div></li>');
+					});
+				});
+			
+		}
+		function prevPage(){
+	
+				
+				var ytUrl = 'https://www.youtube.com/watch?v=',
+					q = $("#prev-button").attr('data-query'),
+					dataToken = $("#prev-button").data('token');
+
+				$("#results").html('');
+				var ul = $("<ul/>", {
+					id:'test'
+				});
+				$("#results").append(ul);
+
+				$.get('https://www.googleapis.com/youtube/v3/search', {
+					key:'<your API Key here>',
+					part:'snippet, id',
+					q:q,
+					pageToken:dataToken,
+					type:'video'
+				}).done(function(data){
+					console.log(data);
+					var videos = data.items;
+					var next = data.nextPageToken;
+					var prev = data.prevPageToken;
+					var btns = createButtons(prev, next);
+					$("#results").append("<div id='button-output'>"+btns+"</div>");
+
+					videos.forEach(function(vid){
+						var snippet = vid.snippet;
+						var id = vid.id.videoId;
+						var title = snippet.title;
+						var thumb = snippet.thumbnails.high.url;
+						var h = snippet.thumbnails.high.height;
+						var w = snippet.thumbnails.high.width;
+
+						$("#results ul").append('<li><div><h3>'+title+'</h3><p><a class="fancybox fancybox.iframe" target="_blank" href="http://www.youtube.com/embed/'+id+'"><img src="'+thumb+'" width="'+w+'"" height="'+h+'"></a></p><p><a class="fancybox fancybox.iframe" target="_blank" href="http://www.youtube.com/embed/'+id+'">'+ytUrl+id+'</a></p></div></li>');
+					});
+				});
+			
+		}
+	</script>
+</body>
+</html>
